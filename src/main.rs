@@ -2,6 +2,7 @@ mod db;
 
 
 use std::io;
+use rusqlite::{Connection, Error};
 // use std::{io, thread, time::Duration};
 // use tui::{
 //     backend::CrosstermBackend,
@@ -15,8 +16,17 @@ use std::io;
 //     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 // };
 
-fn main() -> Result<(), io::Error> {
-    db::setup_schema();
+fn main() -> Result<(), Error> {
+    let conn = db::utils::get_note_db_connection()?;
+
+    // Functions borrow the connection by using & to request a reference to the object
+    // rather than taking ownership
+    db::utils::setup_schema(&conn)?;
+
+    db::notes::add_note(&conn, "Hello World!", "Description")?;
+
+    // TODO: Replace with generic error handling ASAP
+    conn.close().expect("Failed to close database connection");
 
 
     // setup terminal
