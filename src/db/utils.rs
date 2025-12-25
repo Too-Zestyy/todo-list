@@ -1,13 +1,5 @@
 use rusqlite::{Connection, Result, Error};
 
-pub fn get_note_db_connection() -> Result<Connection, Error> {
-    let conn = Connection::open("./notes.sqlite3")?;
-
-    conn.execute("PRAGMA foreign_keys = ON", ())?;
-
-    Ok(conn)
-}
-
 pub fn setup_schema(conn: &Connection) -> Result<(), Error> {
 
     println!("Setting up a DB schema");

@@ -1,2 +1,2 @@
-mod ui;
-mod app;
+pub mod ui;
+pub mod app;

@@ -1,6 +1,14 @@
 // TODO: Update to encompass all necessary parts of UI workflow
 
-use rusqlite::Connection;
+use rusqlite::{Connection, Error};
+
+pub fn get_note_db_connection() -> rusqlite::Result<Connection, Error> {
+    let conn = Connection::open("./notes.sqlite3")?;
+
+    conn.execute("PRAGMA foreign_keys = ON", ())?;
+
+    Ok(conn)
+}
 
 pub enum CurrentScreen {
     Main,
@@ -23,5 +31,13 @@ pub struct App {
 }
 
 impl App {
-
+    pub fn new() -> Result<App, Error> {
+        Ok(App {
+            notes_db_conn: get_note_db_connection()?,
+            key_input: String::new(),
+            value_input: String::new(),
+            current_screen: CurrentScreen::Main,
+            currently_editing: None,
+        })
+    }
 }
