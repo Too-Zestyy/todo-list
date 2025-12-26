@@ -2,21 +2,38 @@ mod db;
 
 use std::error::Error;
 use rusqlite::{Connection};
-use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture};
-use ratatui::crossterm::execute;
+use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event};
+use ratatui::crossterm::{event, execute};
 use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
 use std::io;
 use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::Terminal;
 use todo_list::app;
+use todo_list::ui;
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Result<bool> {
+
+    loop {
+        terminal.draw(|f| ui::app::ui(f, app))?;
+
+        if let Event::Key(key) = event::read()? {
+            if key.kind == event::KeyEventKind::Release {
+                // Skip events that are not KeyEventKind::Press
+                continue;
+            }
+
+            if key.code == event::KeyCode::Esc {
+                return Ok(true);
+            }
+        }
+
+    }
     Ok(true)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let conn = app::get_note_db_connection().expect("Connection to notes DB failed.");
-    db::utils::setup_schema(&conn).expect("Failed to create DB schema.");
+    // db::utils::setup_schema(&conn).expect("Failed to create DB schema.");
 
     // setup terminal
     enable_raw_mode()?;
@@ -39,10 +56,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         DisableMouseCapture
     )?;
     terminal.show_cursor()?;
+    app.notes_db_conn.close().expect("Failed to close database connection");
 
     if let Ok(do_print) = res {
         if do_print {
-            app.print_json()?;
+            println!("No Errors on Exit.");
         }
     } else if let Err(err) = res {
         println!("{err:?}");
@@ -50,12 +68,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // ratatui::restore();
     // TODO: Replace with generic error handling ASAP
-    conn.close().expect("Failed to close database connection");
 
     Ok(())
-
-
-
-
-    // Ok(())
 }
