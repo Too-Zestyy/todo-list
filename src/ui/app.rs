@@ -1,11 +1,10 @@
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout};
-use ratatui::style::{Color, Modifier, Style};
+use ratatui::style::{Color, Modifier, Style, Stylize};
 use ratatui::text::Text;
-use ratatui::widgets::{Block, Borders, Paragraph};
-use crate::app::App;
-
-
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use crate::app::{App, CurrentlyExiting};
+use crate::app::CurrentlyExiting::Yes;
 /*
     TODO:
      - Modularise UI function to prevent monolithic structure
@@ -71,4 +70,66 @@ pub fn ui(frame: &mut Frame, app: &App) {
     frame.render_widget(content, content_layout_chunks[0]);
     frame.render_widget(status_text, footer_layout_chunks[0]);
     frame.render_widget(hotkey_text, footer_layout_chunks[1]);
+
+    render_current_modal(app, frame);
+}
+
+fn render_current_modal(app: &App, frame: &mut Frame) {
+    match app.currently_exiting {
+        None => {return;}
+        // Render the exit modal if a value is available
+        _ => {
+            render_exiting_modal(app, frame);
+        }
+    }
+}
+
+fn render_exiting_modal(app: &App, frame: &mut Frame) {
+    let vert_layout_chunks = Layout::default().direction(Direction::Vertical).constraints([
+        Constraint::Fill(1),
+        Constraint::Percentage(33),
+        Constraint::Fill(1),
+    ]).split(frame.area());
+
+    let modal_layout_chunks = Layout::default().direction(Direction::Horizontal).constraints([
+        Constraint::Fill(1),
+        Constraint::Percentage(50),
+        Constraint::Fill(1),
+    ]).split(vert_layout_chunks[1]);
+
+    // Modal takes the centre chunk within the frame
+    let modal_chunk = modal_layout_chunks[1];
+
+    let modal_block = Block::default().borders(Borders::ALL).on_black().title("Exit App?");
+
+    let entry_chunks = Layout::default().constraints([Constraint::Fill(1)]).margin(1).split(modal_chunk);
+    let entry_rect = entry_chunks[0];
+    let entry_block = Block::default().title("Entry");
+
+    let option_chunks = Layout::default().direction(Direction::Horizontal).constraints([
+        Constraint::Fill(1),
+        Constraint::Fill(1),
+    ]).split(entry_rect);
+    let yes_rect = option_chunks[0];
+    let no_rect = option_chunks[1];
+    let yes_opt = Block::default().borders(Borders::ALL).title("Yes");
+    let mut yes_opt_with_text = Paragraph::new(Text::styled("Exit the program and return to the terminal.",
+                                                            Style::default().add_modifier(Modifier::ITALIC))).block(yes_opt).wrap(Wrap { trim: false });
+    let no_opt = Block::default().borders(Borders::ALL).title("No");
+    let mut no_opt_with_text = Paragraph::new(Text::styled("Cancel this action and return to the program.",
+                                                            Style::default().add_modifier(Modifier::ITALIC))).block(no_opt).wrap(Wrap { trim: false });
+
+    match app.currently_exiting {
+        Some(CurrentlyExiting::Yes) => { yes_opt_with_text = yes_opt_with_text.black().on_light_red();}
+        Some(CurrentlyExiting::No) => {no_opt_with_text = no_opt_with_text.black().on_light_yellow();}
+        _ => {}
+    }
+
+
+
+    frame.render_widget(modal_block, modal_chunk);
+    frame.render_widget(entry_block, entry_rect);
+
+    frame.render_widget(yes_opt_with_text, yes_rect);
+    frame.render_widget(no_opt_with_text, no_rect);
 }

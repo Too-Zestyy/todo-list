@@ -9,6 +9,8 @@ use std::io;
 use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::Terminal;
 use todo_list::app;
+use todo_list::app::CurrentlyExiting;
+use todo_list::app::CurrentlyExiting::No;
 use todo_list::ui;
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Result<bool> {
@@ -22,8 +24,32 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Re
                 continue;
             }
 
-            if key.code == event::KeyCode::Esc {
-                return Ok(true);
+            match app.currently_exiting {
+                None => {
+                    if key.code == event::KeyCode::Esc {
+                        app.currently_exiting = Option::from(No);
+                    }
+                }
+
+                // TODO: Update so exit only happens when yes is selected
+                Some(CurrentlyExiting::Yes) => {
+                    if key.code == event::KeyCode::Enter {
+                        return Ok(true);
+                    }
+                    if key.code == event::KeyCode::Char('d') || key.code == event::KeyCode::Right {
+                        app.currently_exiting = Option::from(CurrentlyExiting::No);
+                    }
+                }
+
+                Some(CurrentlyExiting::No) => {
+                    if key.code == event::KeyCode::Enter {
+                        app.currently_exiting = None;
+                    }
+                    if key.code == event::KeyCode::Char('a') || key.code == event::KeyCode::Left {
+                        app.currently_exiting = Option::from(CurrentlyExiting::Yes);
+                    }
+                }
+
             }
         }
 
