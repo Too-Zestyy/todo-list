@@ -110,11 +110,13 @@ fn render_exiting_modal(app: &App, frame: &mut Frame) {
         Constraint::Fill(1),
         Constraint::Fill(1),
     ]).split(entry_rect);
+    
     let yes_rect = option_chunks[0];
-    let no_rect = option_chunks[1];
     let yes_opt = Block::default().borders(Borders::ALL).title("Yes");
     let mut yes_opt_with_text = Paragraph::new(Text::styled("Exit the program and return to the terminal.",
                                                             Style::default().add_modifier(Modifier::ITALIC))).block(yes_opt).wrap(Wrap { trim: false });
+
+    let no_rect = option_chunks[1];
     let no_opt = Block::default().borders(Borders::ALL).title("No");
     let mut no_opt_with_text = Paragraph::new(Text::styled("Cancel this action and return to the program.",
                                                             Style::default().add_modifier(Modifier::ITALIC))).block(no_opt).wrap(Wrap { trim: false });
