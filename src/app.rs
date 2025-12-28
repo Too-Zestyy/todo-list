@@ -1,6 +1,8 @@
 // TODO: Update to encompass all necessary parts of UI workflow
 
 use rusqlite::{Connection, Error};
+use crate::ui::modals::exit::UiExitModalDialog;
+use crate::ui::modals::interface::ModalDialog;
 
 pub fn get_note_db_connection() -> rusqlite::Result<Connection, Error> {
     let conn = Connection::open("./notes.sqlite3")?;
@@ -31,7 +33,7 @@ pub enum CurrentlyEditing {
 pub struct App {
     pub notes_db_conn: Connection,
     pub current_screen: CurrentScreen, // the current screen the user is looking at, and will later determine what is rendered.
-    pub currently_exiting: Option<CurrentlyExiting>,
+    pub exit_dialog: UiExitModalDialog,
 }
 
 impl App {
@@ -39,7 +41,7 @@ impl App {
         Ok(App {
             notes_db_conn: get_note_db_connection()?,
             current_screen: CurrentScreen::Main,
-            currently_exiting: None,
+            exit_dialog: UiExitModalDialog::new(),
         })
     }
 }
