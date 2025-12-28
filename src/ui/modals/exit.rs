@@ -28,36 +28,31 @@ impl ModalDialog for UiExitModalDialog {
         }
     }
     fn handle_key_events(self: &mut Self, key: &KeyEvent) {
-        match key.kind {
-
-            KeyEventKind::Press => {
-                match self.exit_state {
-                    None => {
-                        if key.code == event::KeyCode::Esc {
-                            self.exit_state = Option::from(CurrentlyExiting::No);
-                        }
+        if key.kind == KeyEventKind::Press {
+            match self.exit_state {
+                None => {
+                    if key.code == event::KeyCode::Esc {
+                        self.exit_state = Option::from(CurrentlyExiting::No);
                     }
-                    Some(CurrentlyExiting::Yes) => {
-                        if key.code == event::KeyCode::Enter {
-                            return self.exit_requested = true;
-                        }
-                        if key.code == event::KeyCode::Char('d') || key.code == event::KeyCode::Right {
-                            self.exit_state = Option::from(CurrentlyExiting::No);
-                        }
+                }
+                Some(CurrentlyExiting::Yes) => {
+                    if key.code == event::KeyCode::Enter {
+                        return self.exit_requested = true;
                     }
+                    if key.code == event::KeyCode::Char('d') || key.code == event::KeyCode::Right {
+                        self.exit_state = Option::from(CurrentlyExiting::No);
+                    }
+                }
 
-                    Some(CurrentlyExiting::No) => {
-                        if key.code == event::KeyCode::Enter {
-                            self.exit_state = None;
-                        }
-                        if key.code == event::KeyCode::Char('a') || key.code == event::KeyCode::Left {
-                            self.exit_state = Option::from(CurrentlyExiting::Yes);
-                        }
+                Some(CurrentlyExiting::No) => {
+                    if key.code == event::KeyCode::Enter {
+                        self.exit_state = None;
+                    }
+                    if key.code == event::KeyCode::Char('a') || key.code == event::KeyCode::Left {
+                        self.exit_state = Option::from(CurrentlyExiting::Yes);
                     }
                 }
             }
-
-            _ => {}
         }
     }
 
