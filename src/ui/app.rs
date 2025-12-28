@@ -11,6 +11,7 @@ use crate::ui::modals::interface::ModalDialog;
      - Add interface to structure rendering (struct with methods?)
      - Add functionality to UI using docs
      - Separate UI code to per 'mode'/'window'
+     - Move ui function to be a render function as part of `impl App`
  */
 pub fn ui(frame: &mut Frame, app: &App) {
     let main_layout_chunks = Layout::default()
