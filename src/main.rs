@@ -1,7 +1,6 @@
 mod db;
 
 use std::error::Error;
-use rusqlite::{Connection};
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event};
 use crossterm::{event, execute};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
@@ -10,29 +9,19 @@ use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::Terminal;
 use todo_list::app;
 use todo_list::ui;
-use todo_list::ui::modals::interface::ModalDialog;
+use todo_list::ui::modals::interfaces::ModalDialog;
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Result<bool> {
 
     loop {
-        terminal.draw(|f| ui::app::ui(f, app))?;
-
-        if let Event::Key(key) = event::read()? {
-            if key.kind == event::KeyEventKind::Release {
-                // Skip events that are not KeyEventKind::Press
-                continue;
-            }
-
-            app.exit_dialog.handle_key_events(&key);
-            if app.exit_dialog.exit_requested {
-                return Ok(true);
-            }
-
-
+        terminal.draw(|f| app.get_current_ui(f))?;
+        let event = event::read()?;
+        app.handle_events(event);
+        if app.exit_dialog.exit_requested {
+            return Ok(true);
         }
 
     }
-    Ok(true)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -50,6 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // create app and run it
     let mut app = app::App::new()?;
+    // let res = run_app(&mut terminal, &mut app);
     let res = run_app(&mut terminal, &mut app);
 
     // restore terminal

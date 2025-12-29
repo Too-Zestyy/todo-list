@@ -1,13 +1,13 @@
 use crossterm::event;
-use crossterm::event::{Event, KeyEventKind};
+use crossterm::event::{KeyEventKind};
 use crossterm::event::KeyEvent;
 use ratatui::Frame;
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::prelude::{Modifier, Style, Text};
 use ratatui::style::Stylize;
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use crate::app::App;
-use crate::ui::modals::interface::ModalDialog;
+use crate::ui::modals::interfaces::ModalDialog;
 
 pub enum CurrentlyExiting {
     Yes,
@@ -27,7 +27,7 @@ impl ModalDialog for UiExitModalDialog {
             exit_requested: false,
         }
     }
-    fn handle_key_events(self: &mut Self, key: &KeyEvent) {
+    fn handle_key_events(&mut self, key: &KeyEvent) {
         if key.kind == KeyEventKind::Press {
             match self.exit_state {
                 None => {
