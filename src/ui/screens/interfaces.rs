@@ -1,6 +1,6 @@
 use crossterm::event::{Event, KeyEvent};
 use ratatui::Frame;
-use rusqlite::Connection;
+use rusqlite::{Connection, Error};
 use crate::app::App;
 
 pub trait AppScreen {
@@ -18,18 +18,19 @@ pub trait AppScreen {
     fn render(&self, f: &mut Frame, app: &App);
 }
 
-pub trait AppScreenWithEventDBAccess {
+pub trait AppScreenWithDBAccess {
 
-    fn new() -> Self;
+    // TODO: Research to better understand Sized constraint
+    fn new(conn: &Connection) -> Result<Self, Error> where Self: Sized;
 
-    fn handle_events(&mut self, event: &Option<Event>, conn: &mut Connection) {
+    fn handle_events(&mut self, event: &Option<Event>, conn: &Connection) {
         match event {
             Some(Event::Key(key_event)) => {self.handle_key_events(key_event, conn)}
             _ => {}
         }
     }
 
-    fn handle_key_events(&mut self, key: &KeyEvent, conn: &mut Connection);
+    fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection);
 
     fn render(&self, f: &mut Frame, app: &App);
 

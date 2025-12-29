@@ -1,3 +1,3 @@
 mod structs;
 pub mod modals;
-mod screens;
+pub mod screens;

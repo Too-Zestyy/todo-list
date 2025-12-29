@@ -1,3 +1,3 @@
 pub mod interfaces;
 pub mod structs;
-mod note_select;
+pub mod note_select;

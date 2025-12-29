@@ -10,6 +10,7 @@ use ratatui::Terminal;
 use todo_list::app;
 use todo_list::ui;
 use todo_list::ui::modals::interfaces::ModalDialog;
+use todo_list::ui::screens::note_select::get_note_title_page;
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Result<bool> {
 
@@ -26,6 +27,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Re
 
 fn main() -> Result<(), Box<dyn Error>> {
     let conn = app::get_note_db_connection().expect("Connection to notes DB failed.");
+
+    get_note_title_page(&conn, 1).expect("Query failed");
+
     // db::utils::setup_schema(&conn).expect("Failed to create DB schema.");
 
     // setup terminal
