@@ -23,16 +23,16 @@ pub trait AppScreenWithDBAccess {
     // TODO: Research to better understand Sized constraint
     fn new(conn: &Connection) -> Result<Self, Error> where Self: Sized;
 
-    fn handle_events(&mut self, event: &Option<Event>, conn: &Connection) {
+    fn handle_events(&mut self, event: &Event, conn: &Connection) {
         match event {
-            Some(Event::Key(key_event)) => {self.handle_key_events(key_event, conn)}
+            Event::Key(key_event) => {self.handle_key_events(key_event, conn)}
             _ => {}
         }
     }
 
     fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection);
 
-    fn render(&self, f: &mut Frame, app: &App);
+    fn render(&self, frame: &mut Frame, app: &App);
 
 
 
