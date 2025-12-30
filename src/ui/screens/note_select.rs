@@ -23,6 +23,11 @@ pub struct NoteOption {
     note_name: String,
 }
 
+const DEFAULT_NOTE: NoteOption = NoteOption {
+    note_id: 0,
+    note_name: String::new(),
+};
+
 pub fn get_note_title_page(conn: &Connection, page: u32) -> Result<[Option<NoteOption>; NOTE_PAGE_SIZE], Error> {
     let mut stmt = conn.prepare(
         "SELECT id, name FROM NOTES LIMIT ?1 OFFSET ?2"
@@ -172,29 +177,22 @@ impl NoteSelectScreen {
         ).split(rect);
 
         for i in 0..NOTE_PAGE_SIZE {
-            if self.current_note_page[i].is_some() {
-                // TODO: Cloning is not ideal every frame - try to get the title without cloning
-                let note_value = self.current_note_page[i].clone().unwrap_or(
-                    NoteOption {
-                        note_id: 0,
-                        note_name: "Unknown Note - FIX".to_string()
+            match &self.current_note_page[i] {
+                None => {}
+
+                Some(NoteOption { note_id, note_name }) => {
+                    let note_title_block = Block::default().style(Style::default());
+                    let mut note_title_text = Paragraph::new(
+                        Text::styled(note_name, Style::default())
+                    ).block(note_title_block);
+
+                    if self.current_selection_index == i {
+                        note_title_text = note_title_text.black().on_white()
                     }
-                );
 
-                let note_title_block = Block::default().style(Style::default());
-                let mut note_title_text = Paragraph::new(
-                    Text::styled(note_value.note_name, Style::default())
-                ).block(note_title_block);
-
-                if self.current_selection_index == i {
-                    note_title_text = note_title_text.black().on_white()
+                    frame.render_widget(note_title_text, note_rects[i]);
                 }
-
-                frame.render_widget(note_title_text, note_rects[i]);
-
-
             }
-
         }
     }
 }
