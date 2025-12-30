@@ -75,15 +75,15 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
         )
     }
 
-    fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) {
+    fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) -> Result<(), Error> {
         if key.kind != KeyEventKind::Press {
-            return
+            return Ok(())
         }
 
         if key.code == KeyCode::Char('w') || key.code == KeyCode::Up {
             if self.current_selection_index > 0 {
                 if self.current_note_page[self.current_selection_index - 1].is_none() {
-                    return;
+                    return Ok(());
                 }
                 self.current_selection_index -= 1;
             }
@@ -91,13 +91,15 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 // TODO: Check for empty page and prevent scrolling if so
                 self.current_selection_page -= 1;
                 self.current_selection_index = NOTE_PAGE_SIZE - 1;
+
+                self.current_note_page = get_note_title_page(conn, self.current_selection_page)?;
             }
         }
 
         else if key.code == KeyCode::Char('s') || key.code == KeyCode::Down {
             if self.current_selection_index < NOTE_PAGE_SIZE - 1 {
                 if self.current_note_page[self.current_selection_index + 1].is_none() {
-                    return;
+                    return Ok(());
                 }
                 self.current_selection_index += 1;
             }
@@ -105,8 +107,12 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 // TODO: Check for empty page and prevent scrolling if so
                 self.current_selection_page += 1;
                 self.current_selection_index = 0;
+
+                self.current_note_page = get_note_title_page(conn, self.current_selection_page)?;
             }
         }
+
+        Ok(())
 
     }
 
