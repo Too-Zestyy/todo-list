@@ -15,7 +15,7 @@ pub enum CurrentlyExiting {
 }
 
 pub struct UiExitModalDialog {
-    exit_state: Option<CurrentlyExiting>,
+    pub exit_state: Option<CurrentlyExiting>,
     pub exit_requested: bool,
 }
 

@@ -5,9 +5,9 @@ use crate::app::App;
 pub trait ModalDialog {
 
     fn new() -> Self;
-    fn handle_events(self: &mut Self, event: &Option<Event>) {
+    fn handle_events(self: &mut Self, event: &Event) {
         match event {
-            Some(Event::Key(key_event)) => {self.handle_key_events(key_event)}
+            Event::Key(key_event) => {self.handle_key_events(key_event)}
             _ => {}
         }
     }

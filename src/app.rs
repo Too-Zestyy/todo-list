@@ -58,6 +58,16 @@ impl App {
 
     pub fn handle_events(&mut self, event: Event) {
 
+        self.exit_dialog.handle_events(&event);
+        match &self.exit_dialog.exit_state {
+            None => {}
+            Some(..) => {
+                // Exit dialogue will use the event as normal
+                // while blocking all other elements from using them
+                return;
+            }
+        }
+
         match self.screen_state.current_screen {
             // TODO: Find a way to get the current screen from a single function,
             //  rather than using a match for both
@@ -65,15 +75,10 @@ impl App {
                 self.screen_state.note_select_screen.handle_events(
                     &event,
                     &self.notes_db_conn
-                );
+                ).expect("Error handling events for note selection screen.");
             }
         }
 
-        if let Event::Key(key) = event {
-
-            self.exit_dialog.handle_key_events(&key);
-
-        }
     }
 
     pub fn get_current_ui(&self, frame: &mut Frame) {
@@ -86,6 +91,6 @@ impl App {
 
         }
 
-        self.exit_dialog.render(frame, &self);
+        self.exit_dialog.render(frame, self);
     }
 }

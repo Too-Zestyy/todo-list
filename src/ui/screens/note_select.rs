@@ -186,7 +186,7 @@ impl NoteSelectScreen {
             match &self.current_note_page[i] {
                 None => {}
 
-                Some(NoteOption { note_id, note_name }) => {
+                Some(NoteOption { note_name, .. }) => {
                     let note_title_block = Block::default().style(Style::default());
                     let mut note_title_text = Paragraph::new(
                         Text::styled(note_name, Style::default())
