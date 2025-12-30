@@ -1,7 +1,8 @@
-use crossterm::event::KeyEvent;
+use crossterm::event::{KeyEvent, KeyEventKind};
 use ratatui::Frame;
-use ratatui::layout::{Constraint, Direction, Layout};
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Modifier, Style, Text};
+use ratatui::style::Stylize;
 use ratatui::widgets::{Block, Borders, Paragraph};
 use rusqlite::{params, Connection, Error};
 use crate::app::App;
@@ -16,7 +17,7 @@ pub struct NoteSelectScreen {
     current_note_page: [Option<NoteOption>; NOTE_PAGE_SIZE],
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NoteOption {
     note_id: u32,
     note_name: String,
@@ -70,7 +71,10 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
     }
 
     fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) {
-        
+        if key.kind != KeyEventKind::Press {
+            return
+        }
+
     }
 
     fn render(&self, frame: &mut Frame, app: &App) {
@@ -107,9 +111,10 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
             Style::default().add_modifier(Modifier::BOLD),
         )).block(title_block);
 
-        let content = Block::default()
-            .borders(Borders::ALL)
-            .style(Style::default().fg(Color::White));
+        // let content = Block::default()
+        //     .borders(Borders::ALL)
+        //     .style(Style::default().fg(Color::White));
+
 
         let status_block = Block::default()
             .borders(Borders::ALL)
@@ -128,8 +133,46 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
         )).block(hotkey_block);
 
         frame.render_widget(title, main_layout_chunks[0]);
-        frame.render_widget(content, content_layout_chunks[0]);
+        // frame.render_widget(content, content_layout_chunks[0]);
+        self.render_note_titles(content_layout_chunks[0], frame);
         frame.render_widget(status_text, footer_layout_chunks[0]);
         frame.render_widget(hotkey_text, footer_layout_chunks[1]);
+    }
+
+}
+
+impl NoteSelectScreen {
+    fn render_note_titles(&self, rect: Rect, frame: &mut Frame) {
+        let note_rects = Layout::default().direction(Direction::Vertical).constraints(
+            // Ensure each note as one character of height to display the title
+            [const {Constraint::Min(1)}; NOTE_PAGE_SIZE]
+        ).split(rect);
+
+        for i in 0..NOTE_PAGE_SIZE {
+            if self.current_note_page[i].is_some() {
+                // TODO: Cloning is not ideal every frame - try to get the title without cloning
+                let note_value = self.current_note_page[i].clone().unwrap_or(
+                    NoteOption {
+                        note_id: 0,
+                        note_name: "Unknown Note - FIX".to_string()
+                    }
+                );
+
+                // format!("{: <25}", self.current_note_page.unwrap());
+                let note_title_block = Block::default().style(Style::default());
+                let mut note_title_text = Paragraph::new(
+                    Text::styled(note_value.note_name, Style::default())
+                ).block(note_title_block);
+
+                if self.current_selection_index == i as u8 {
+                    note_title_text = note_title_text.black().on_white()
+                }
+
+                frame.render_widget(note_title_text, note_rects[i]);
+
+
+            }
+
+        }
     }
 }
