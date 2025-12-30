@@ -83,6 +83,8 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
             return Ok(())
         }
 
+        // TODO: Remove page count state and check lazily?
+
         if key.code == KeyCode::Char('w') || key.code == KeyCode::Up {
             if self.current_selection_index > 0 {
                 if self.current_note_page[self.current_selection_index - 1].is_none() {
@@ -91,7 +93,6 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 self.current_selection_index -= 1;
             }
             else if self.currently_selected_page > 1 {
-                // TODO: Check for empty page and prevent scrolling if so
                 self.currently_selected_page -= 1;
                 self.current_selection_index = NOTE_PAGE_SIZE - 1;
 
@@ -111,7 +112,7 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 self.update_page_count(conn)?;
 
                 // Return to the last available page if we're now out of bounds
-                if self.currently_selected_page > self.note_page_count {
+                if self.currently_selected_page >= self.note_page_count {
                     self.currently_selected_page = self.note_page_count;
                 }
                 else {
