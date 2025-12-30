@@ -1,4 +1,4 @@
-use crossterm::event::{KeyEvent, KeyEventKind};
+use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Modifier, Style, Text};
@@ -12,7 +12,7 @@ const NOTE_PAGE_SIZE: usize = 10;
 const NOTE_PAGE_SIZE_U32: u32 = NOTE_PAGE_SIZE as u32;
 
 pub struct NoteSelectScreen {
-    current_selection_index: u8, // Only needs to go up to a reasonable number to fit in a single screen
+    current_selection_index: usize, // Only needs to go up to a reasonable number to fit in a single screen
     current_selection_page: u32,
     current_note_page: [Option<NoteOption>; NOTE_PAGE_SIZE],
 }
@@ -75,6 +75,34 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
             return
         }
 
+        if key.code == KeyCode::Char('w') || key.code == KeyCode::Up {
+            if self.current_selection_index > 0 {
+                if self.current_note_page[self.current_selection_index - 1].is_none() {
+                    return;
+                }
+                self.current_selection_index -= 1;
+            }
+            else if self.current_selection_page > 1 {
+                // TODO: Check for empty page and prevent scrolling if so
+                self.current_selection_page -= 1;
+                self.current_selection_index = NOTE_PAGE_SIZE - 1;
+            }
+        }
+
+        else if key.code == KeyCode::Char('s') || key.code == KeyCode::Down {
+            if self.current_selection_index < NOTE_PAGE_SIZE - 1 {
+                if self.current_note_page[self.current_selection_index + 1].is_none() {
+                    return;
+                }
+                self.current_selection_index += 1;
+            }
+            else {
+                // TODO: Check for empty page and prevent scrolling if so
+                self.current_selection_page += 1;
+                self.current_selection_index = 0;
+            }
+        }
+
     }
 
     fn render(&self, frame: &mut Frame, app: &App) {
@@ -110,11 +138,6 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
             "To-do List",
             Style::default().add_modifier(Modifier::BOLD),
         )).block(title_block);
-
-        // let content = Block::default()
-        //     .borders(Borders::ALL)
-        //     .style(Style::default().fg(Color::White));
-
 
         let status_block = Block::default()
             .borders(Borders::ALL)
@@ -158,13 +181,12 @@ impl NoteSelectScreen {
                     }
                 );
 
-                // format!("{: <25}", self.current_note_page.unwrap());
                 let note_title_block = Block::default().style(Style::default());
                 let mut note_title_text = Paragraph::new(
                     Text::styled(note_value.note_name, Style::default())
                 ).block(note_title_block);
 
-                if self.current_selection_index == i as u8 {
+                if self.current_selection_index == i {
                     note_title_text = note_title_text.black().on_white()
                 }
 
