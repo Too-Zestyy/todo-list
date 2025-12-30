@@ -77,7 +77,7 @@ impl ModalDialog for UiExitModalDialog {
         // Modal takes the centre chunk within the frame
         let modal_chunk = modal_layout_chunks[1];
 
-        let modal_block = Block::default().borders(Borders::ALL).on_black().title("Exit App?");
+        let modal_block = Block::default().borders(Borders::ALL).white().on_black().title("Exit App?");
 
         let entry_chunks = Layout::default().constraints([Constraint::Fill(1)]).margin(1).split(modal_chunk);
         let entry_rect = entry_chunks[0];

@@ -3,9 +3,10 @@ use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Modifier, Style, Text};
 use ratatui::style::Stylize;
-use ratatui::widgets::{Block, Borders, Paragraph};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use rusqlite::{params, Connection, Error};
 use crate::app::App;
+use crate::db::notes::get_note_page_count;
 use crate::ui::screens::interfaces::{AppScreen, AppScreenWithDBAccess};
 
 const NOTE_PAGE_SIZE: usize = 10;
@@ -13,8 +14,9 @@ const NOTE_PAGE_SIZE_U32: u32 = NOTE_PAGE_SIZE as u32;
 
 pub struct NoteSelectScreen {
     current_selection_index: usize, // Only needs to go up to a reasonable number to fit in a single screen
-    current_selection_page: u32,
+    currently_selected_page: u32,
     current_note_page: [Option<NoteOption>; NOTE_PAGE_SIZE],
+    note_page_count: u32,
 }
 
 #[derive(Debug, Clone)]
@@ -69,8 +71,9 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
         Ok(
             NoteSelectScreen {
                 current_selection_index: 0,
-                current_selection_page: 1,
+                currently_selected_page: 1,
                 current_note_page: get_note_title_page(conn, 1)?,
+                note_page_count: get_note_page_count(conn, NOTE_PAGE_SIZE_U32)?
             }
         )
     }
@@ -87,12 +90,12 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 }
                 self.current_selection_index -= 1;
             }
-            else if self.current_selection_page > 1 {
+            else if self.currently_selected_page > 1 {
                 // TODO: Check for empty page and prevent scrolling if so
-                self.current_selection_page -= 1;
+                self.currently_selected_page -= 1;
                 self.current_selection_index = NOTE_PAGE_SIZE - 1;
 
-                self.current_note_page = get_note_title_page(conn, self.current_selection_page)?;
+                self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
             }
         }
 
@@ -104,11 +107,21 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 self.current_selection_index += 1;
             }
             else {
-                // TODO: Check for empty page and prevent scrolling if so
-                self.current_selection_page += 1;
-                self.current_selection_index = 0;
+                // Update page count to ensure selection is within bounds
+                self.update_page_count(conn)?;
 
-                self.current_note_page = get_note_title_page(conn, self.current_selection_page)?;
+                // Return to the last available page if we're now out of bounds
+                if self.currently_selected_page > self.note_page_count {
+                    self.currently_selected_page = self.note_page_count;
+                }
+                else {
+                    self.currently_selected_page += 1;
+                    // Only move the selected item to the first one
+                    // when we're moving to the next page in an expected manner
+                    self.current_selection_index = 0;
+                }
+
+                self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
             }
         }
 
@@ -190,7 +203,7 @@ impl NoteSelectScreen {
                     let note_title_block = Block::default().style(Style::default());
                     let mut note_title_text = Paragraph::new(
                         Text::styled(note_name, Style::default())
-                    ).block(note_title_block);
+                    ).wrap(Wrap { trim: false }).block(note_title_block);
 
                     if self.current_selection_index == i {
                         note_title_text = note_title_text.black().on_white()
@@ -200,5 +213,11 @@ impl NoteSelectScreen {
                 }
             }
         }
+    }
+
+    fn update_page_count(&mut self, conn: &Connection) -> Result<(), Error> {
+        self.note_page_count = get_note_page_count(conn, NOTE_PAGE_SIZE_U32)?;
+
+        Ok(())
     }
 }
