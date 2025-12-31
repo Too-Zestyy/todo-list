@@ -56,7 +56,7 @@ impl ModalDialog for UiExitModalDialog {
         }
     }
 
-    fn render(&self, frame: &mut Frame, app: &App) {
+    fn render(&self, frame: &mut Frame) {
         // Only render when the dialog is active (i.e the exit state contains a selected option)
         if self.exit_state.is_none() {
             return;

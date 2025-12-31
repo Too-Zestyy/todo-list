@@ -14,5 +14,5 @@ pub trait ModalDialog {
 
     fn handle_key_events(self: &mut Self, key: &KeyEvent);
 
-    fn render(&self, f: &mut Frame, app: &App);
+    fn render(&self, f: &mut Frame);
 }

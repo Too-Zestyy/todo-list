@@ -4,12 +4,12 @@ use std::io;
 use std::io::Stdout;
 use crossterm::event::{self, Event};
 use ratatui::layout::{Constraint, Direction, Layout};
-use ratatui::style::{Color, Modifier, Style};
+use ratatui::style::{Color, Modifier, Style, Stylize};
 use ratatui::text::Text;
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::{Frame, Terminal};
 use ratatui::backend::CrosstermBackend;
-use ratatui::prelude::Backend;
+use ratatui::prelude::{Alignment, Backend};
 use rusqlite::{Connection, Error};
 use crate::ui;
 use crate::ui::modals::exit::UiExitModalDialog;
@@ -83,14 +83,78 @@ impl App {
 
     pub fn get_current_ui(&self, frame: &mut Frame) {
 
+        let main_layout_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(3),
+                Constraint::Min(1),
+                Constraint::Length(3),
+            ])
+            .split(frame.area());
+
+        let content_layout_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Fill(1),
+            ]).split(main_layout_chunks[1]);
+        let screen_rect = content_layout_chunks[0];
+        // ANCHOR_END: ui_layout
+
+        let footer_layout_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(50),
+                Constraint::Percentage(50),
+            ]).split(main_layout_chunks[2]);
+
+        // ANCHOR: title_paragraph
+        let title_block = Block::default()
+            .borders(Borders::ALL)
+            .white()
+            .style(Style::default());
+
+        let status_block = Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White));
+
+        let hotkey_block = Block::default()
+            .borders(Borders::ALL)
+            .style(Style::default().fg(Color::White));
+
+        let title_content: &str;
+        let status_content: &str;
+        let hotkey_content: &str;
+
         match self.screen_state.current_screen {
 
             CurrentScreen::SelectNote => {
-                self.screen_state.note_select_screen.render(frame, self);
+                self.screen_state.note_select_screen.render(screen_rect, frame);
+
+                title_content = self.screen_state.note_select_screen.get_title();
+                status_content = self.screen_state.note_select_screen.get_status();
+                hotkey_content = self.screen_state.note_select_screen.get_hotkey_text();
             }
 
         }
+        let title = Paragraph::new(Text::styled(
+            title_content,
+            Style::default().add_modifier(Modifier::BOLD),
+        )).alignment(Alignment::Center).block(title_block);
 
-        self.exit_dialog.render(frame, self);
+        let status_text = Paragraph::new(Text::styled(
+            status_content,
+            Style::default().add_modifier(Modifier::ITALIC),
+        )).block(status_block);
+
+        let hotkey_text = Paragraph::new(Text::styled(
+            hotkey_content,
+            Style::default().add_modifier(Modifier::BOLD).add_modifier(Modifier::ITALIC),
+        )).block(hotkey_block);
+
+        frame.render_widget(title, main_layout_chunks[0]);
+        frame.render_widget(status_text, footer_layout_chunks[0]);
+        frame.render_widget(hotkey_text, footer_layout_chunks[1]);
+
+        self.exit_dialog.render(frame);
     }
 }
