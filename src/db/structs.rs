@@ -1,8 +1,8 @@
 #[derive(Debug)]
-struct Note {
-    id: i32,
-    name: String,
-    description: String
+pub struct Note {
+    pub id: u32,
+    pub name: String,
+    pub description: String
 }
 
 #[derive(Debug)]

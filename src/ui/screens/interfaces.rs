@@ -22,7 +22,7 @@ pub trait AppScreen {
 pub trait AppScreenWithDBAccess {
 
     // TODO: Research to better understand Sized constraint
-    fn new(conn: &Connection) -> Result<Self, Error> where Self: Sized;
+    // fn new(conn: &Connection) -> Result<Self, Error> where Self: Sized;
 
     fn get_title(&self) -> &str;
     fn get_status(&self) -> &str;

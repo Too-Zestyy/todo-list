@@ -1,4 +1,5 @@
 use rusqlite::{params, Connection, Error};
+use crate::db::structs::Note;
 
 pub fn add_note(conn: &Connection, name: &str, description: &str) -> Result<(), Error> {
     conn.execute(
@@ -32,4 +33,19 @@ pub fn get_note_page_count(conn: &Connection, note_page_length: u32) -> Result<u
             Err(error)
         }
     }
+}
+
+pub fn get_note_details(conn: &Connection, note_id: u32) -> Result<Note, Error> {
+    let note: Result<Note, Error> = conn.query_one(
+        "SELECT id, name, description FROM notes WHERE id = ?",
+        params![note_id],
+        |row| {
+            Ok(Note {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                description: row.get(2)?
+            })
+    });
+
+    Ok(note?)
 }

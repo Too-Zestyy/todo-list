@@ -17,6 +17,8 @@ pub struct NoteSelectScreen {
     currently_selected_page: u32,
     current_note_page: [Option<NoteOption>; NOTE_PAGE_SIZE],
     note_page_count: u32,
+
+    pub note_view_request: Option<u32>
 }
 
 #[derive(Debug, Clone)]
@@ -66,17 +68,6 @@ pub fn get_note_title_page(conn: &Connection, page: u32) -> Result<[Option<NoteO
 }
 
 impl AppScreenWithDBAccess for NoteSelectScreen {
-    fn new(conn: &Connection) -> Result<Self, Error> {
-
-        Ok(
-            NoteSelectScreen {
-                current_selection_index: 0,
-                currently_selected_page: 1,
-                current_note_page: get_note_title_page(conn, 1)?,
-                note_page_count: get_note_page_count(conn, NOTE_PAGE_SIZE_U32)?
-            }
-        )
-    }
 
     fn get_title(&self) -> &str {
         "To-do List - Select a note"
@@ -96,46 +87,61 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
         }
 
         // TODO: Remove page count state and check lazily?
-
-        if key.code == KeyCode::Char('w') || key.code == KeyCode::Up {
-            if self.current_selection_index > 0 {
-                if self.current_note_page[self.current_selection_index - 1].is_none() {
-                    return Ok(());
+        match key.code {
+            KeyCode::Char('w') | KeyCode::Up => {
+                if self.current_selection_index > 0 {
+                    if self.current_note_page[self.current_selection_index - 1].is_none() {
+                        return Ok(());
+                    }
+                    self.current_selection_index -= 1;
                 }
-                self.current_selection_index -= 1;
-            }
-            else if self.currently_selected_page > 1 {
-                self.currently_selected_page -= 1;
-                self.current_selection_index = NOTE_PAGE_SIZE - 1;
+                else if self.currently_selected_page > 1 {
+                    self.currently_selected_page -= 1;
+                    self.current_selection_index = NOTE_PAGE_SIZE - 1;
 
-                self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
-            }
-        }
-
-        else if key.code == KeyCode::Char('s') || key.code == KeyCode::Down {
-            if self.current_selection_index < NOTE_PAGE_SIZE - 1 {
-                if self.current_note_page[self.current_selection_index + 1].is_none() {
-                    return Ok(());
+                    self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
                 }
-                self.current_selection_index += 1;
             }
-            else {
-                // Update page count to ensure selection is within bounds
-                self.update_page_count(conn)?;
 
-                // Return to the last available page if we're now out of bounds
-                if self.currently_selected_page >= self.note_page_count {
-                    self.currently_selected_page = self.note_page_count;
+            KeyCode::Char('s') | KeyCode::Down => {
+                if self.current_selection_index < NOTE_PAGE_SIZE - 1 {
+                    if self.current_note_page[self.current_selection_index + 1].is_none() {
+                        return Ok(());
+                    }
+                    self.current_selection_index += 1;
                 }
                 else {
-                    self.currently_selected_page += 1;
-                    // Only move the selected item to the first one
-                    // when we're moving to the next page in an expected manner
-                    self.current_selection_index = 0;
-                }
+                    // Update page count to ensure selection is within bounds
+                    self.update_page_count(conn)?;
 
-                self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
+                    // Return to the last available page if we're now out of bounds
+                    if self.currently_selected_page >= self.note_page_count {
+                        self.currently_selected_page = self.note_page_count;
+                    }
+                    else {
+                        self.currently_selected_page += 1;
+                        // Only move the selected item to the first one
+                        // when we're moving to the next page in an expected manner
+                        self.current_selection_index = 0;
+                    }
+
+                    self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
+                }
             }
+
+            KeyCode::Enter => {
+                match &self.current_note_page[self.current_selection_index] {
+                    Some(note_option) => {
+                        self.note_view_request = Some(note_option.note_id);
+                    },
+                    // Should never be possible, but should be recoverable ideally
+                    // TODO: Refactor return signature to allow for custom error
+                    None => panic!("Attempted to select a note that does not exist.")
+                }
+                // self.note_selection = self.current_note_page[self.current_selection_index];
+            }
+
+            _ => {}
         }
 
         Ok(())
@@ -150,6 +156,19 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
 }
 
 impl NoteSelectScreen {
+    pub(crate) fn new(conn: &Connection) -> Result<Self, Error> {
+        Ok(
+            NoteSelectScreen {
+                current_selection_index: 0,
+                currently_selected_page: 1,
+                current_note_page: get_note_title_page(conn, 1)?,
+                note_page_count: get_note_page_count(conn, NOTE_PAGE_SIZE_U32)?,
+
+                note_view_request: None
+            }
+        )
+    }
+
     fn render_note_titles(&self, rect: Rect, frame: &mut Frame) {
         let note_rects = Layout::default().direction(Direction::Vertical).constraints(
             // Ensure each note as one character of height to display the title
