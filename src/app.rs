@@ -11,6 +11,7 @@ use ratatui::{Frame, Terminal};
 use ratatui::backend::CrosstermBackend;
 use ratatui::prelude::{Alignment, Backend};
 use rusqlite::{Connection, Error};
+use crate::db::schema::create_note_db_schema;
 use crate::ui;
 use crate::ui::modals::exit::UiExitModalDialog;
 use crate::ui::modals::interfaces::ModalDialog;
@@ -47,6 +48,8 @@ impl App {
     pub fn new() -> Result<App, Error> {
 
         let app_conn = get_note_db_connection()?;
+        create_note_db_schema(&app_conn)?;
+
         let note_select_screen = NoteSelectScreen::new(&app_conn)?;
         // Only load from DB when explicitly selected
         let note_view_screen = NoteViewScreen {
@@ -207,7 +210,7 @@ impl App {
 
         let hotkey_text = Paragraph::new(Text::styled(
             hotkey_content,
-            Style::default().add_modifier(Modifier::BOLD).add_modifier(Modifier::ITALIC),
+            Style::default().add_modifier(Modifier::BOLD),
         )).block(hotkey_block);
 
         frame.render_widget(title, main_layout_chunks[0]);

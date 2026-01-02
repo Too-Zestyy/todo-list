@@ -28,7 +28,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Re
 fn main() -> Result<(), Box<dyn Error>> {
     let conn = app::get_note_db_connection().expect("Connection to notes DB failed.");
 
-    get_note_title_page(&conn, 1).expect("Query failed");
+    // get_note_title_page(&conn, 1).expect("Query failed");
 
     // db::utils::setup_schema(&conn).expect("Failed to create DB schema.");
 

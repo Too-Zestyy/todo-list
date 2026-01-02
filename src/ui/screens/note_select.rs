@@ -18,7 +18,6 @@ pub struct NoteSelectScreen {
     current_note_page: [Option<NoteOption>; NOTE_PAGE_SIZE],
     note_page_count: u32,
 
-    // pub note_view_request: Option<u32>
     pub signals: NoteSelectSignals
 }
 
@@ -83,7 +82,7 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
     }
 
     fn get_hotkey_text(&self) -> &str {
-        "Esc: Quit Program"
+        "Esc: Quit | W/S/↑/↓: Select Note"
     }
 
     fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) -> Result<(), Error> {
@@ -139,9 +138,8 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                     Some(note_option) => {
                         self.signals.note_view_request = Some(note_option.note_id);
                     },
-                    // Should never be possible, but should be recoverable ideally
-                    // TODO: Refactor return signature to allow for custom error
-                    None => panic!("Attempted to select a note that does not exist.")
+                    // Ignore attempts to select an invalid note
+                    None => {}
                 }
                 // self.note_selection = self.current_note_page[self.current_selection_index];
             }
