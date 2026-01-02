@@ -96,7 +96,7 @@ impl App {
                     &self.notes_db_conn
                 ).expect("Error handling events for note selection screen.");
 
-                match self.screen_state.note_select_screen.note_view_request {
+                match self.screen_state.note_select_screen.signals.note_view_request {
                     Some(requested_note_id) => {
                         self.screen_state.note_view_screen = NoteViewScreen::new(
                             &self.notes_db_conn,
@@ -111,7 +111,7 @@ impl App {
                         });
 
                         self.screen_state.current_screen = CurrentScreen::ViewNote;
-                        self.screen_state.note_select_screen.note_view_request = None;
+                        self.screen_state.note_select_screen.signals.note_view_request = None;
                     },
 
                     None => {}

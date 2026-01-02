@@ -18,6 +18,11 @@ pub struct NoteSelectScreen {
     current_note_page: [Option<NoteOption>; NOTE_PAGE_SIZE],
     note_page_count: u32,
 
+    // pub note_view_request: Option<u32>
+    pub signals: NoteSelectSignals
+}
+
+pub struct NoteSelectSignals {
     pub note_view_request: Option<u32>
 }
 
@@ -132,7 +137,7 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
             KeyCode::Enter => {
                 match &self.current_note_page[self.current_selection_index] {
                     Some(note_option) => {
-                        self.note_view_request = Some(note_option.note_id);
+                        self.signals.note_view_request = Some(note_option.note_id);
                     },
                     // Should never be possible, but should be recoverable ideally
                     // TODO: Refactor return signature to allow for custom error
@@ -164,7 +169,9 @@ impl NoteSelectScreen {
                 current_note_page: get_note_title_page(conn, 1)?,
                 note_page_count: get_note_page_count(conn, NOTE_PAGE_SIZE_U32)?,
 
-                note_view_request: None
+                signals: NoteSelectSignals {
+                    note_view_request: None
+                }
             }
         )
     }
