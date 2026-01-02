@@ -56,6 +56,9 @@ impl App {
             note_id: 0,
             title: "".to_string(),
             content: "".to_string(),
+            // FIXME
+            date_created: "".to_string(),
+            last_updated: "".to_string(),
             signals: NoteViewSignals {
                 exit_requested: false,
             },
@@ -108,6 +111,9 @@ impl App {
                             note_id: 0,
                             title: "Invalid Note".to_string(),
                             content: "The note could not be opened. Please try again or restart the app.".to_string(),
+                            // FIXME
+                            date_created: "".to_string(),
+                            last_updated: "".to_string(),
                             signals: NoteViewSignals {
                                 exit_requested: false,
                             },
@@ -176,9 +182,9 @@ impl App {
             .borders(Borders::ALL)
             .style(Style::default().fg(Color::White));
 
-        let title_content: &str;
-        let status_content: &str;
-        let hotkey_content: &str;
+        let title_content: String;
+        let status_content: String;
+        let hotkey_content: String;
 
         match self.screen_state.current_screen {
 

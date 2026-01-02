@@ -24,9 +24,9 @@ pub trait AppScreenWithDBAccess {
     // TODO: Research to better understand Sized constraint
     // fn new(conn: &Connection) -> Result<Self, Error> where Self: Sized;
 
-    fn get_title(&self) -> &str;
-    fn get_status(&self) -> &str;
-    fn get_hotkey_text(&self) -> &str;
+    fn get_title(&self) -> String;
+    fn get_status(&self) -> String;
+    fn get_hotkey_text(&self) -> String;
 
     fn handle_events(&mut self, event: &Event, conn: &Connection) -> Result<(), Error> {
         match event {

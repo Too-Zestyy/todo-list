@@ -37,13 +37,15 @@ pub fn get_note_page_count(conn: &Connection, note_page_length: u32) -> Result<u
 
 pub fn get_note_details(conn: &Connection, note_id: u32) -> Result<Note, Error> {
     let note: Result<Note, Error> = conn.query_one(
-        "SELECT id, name, description FROM notes WHERE id = ?",
+        "SELECT id, name, description, date_created_utc, last_updated_utc FROM notes WHERE id = ?",
         params![note_id],
         |row| {
             Ok(Note {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                description: row.get(2)?
+                description: row.get(2)?,
+                date_created_utc: row.get(3)?,
+                last_updated_utc: row.get(4)?,
             })
     });
 

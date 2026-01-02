@@ -18,20 +18,22 @@ pub struct NoteViewScreen {
     pub note_id: u32,
     pub title: String,
     pub content: String,
+    pub date_created: String,
+    pub last_updated: String,
     pub signals: NoteViewSignals
 }
 
 impl AppScreenWithDBAccess for NoteViewScreen {
-    fn get_title(&self) -> &str {
-        "Note View"
+    fn get_title(&self) -> String {
+        "Note View".to_string()
     }
 
-    fn get_status(&self) -> &str {
-        "Viewing Note"
+    fn get_status(&self) -> String {
+        format!("Created: {} | Last Updated: {}", self.date_created, self.last_updated)
     }
 
-    fn get_hotkey_text(&self) -> &str {
-        "Esc: Return to selection menu"
+    fn get_hotkey_text(&self) -> String {
+        "Esc: Return to selection menu".to_string()
     }
 
     fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) -> Result<(), Error> {
@@ -70,6 +72,8 @@ impl NoteViewScreen {
             note_id: note_details.id,
             title: note_details.name,
             content: note_details.description,
+            date_created: note_details.date_created_utc,
+            last_updated: note_details.last_updated_utc,
             signals: NoteViewSignals {
                 exit_requested: false,
             }

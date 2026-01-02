@@ -73,16 +73,16 @@ pub fn get_note_title_page(conn: &Connection, page: u32) -> Result<[Option<NoteO
 
 impl AppScreenWithDBAccess for NoteSelectScreen {
 
-    fn get_title(&self) -> &str {
-        "To-do List - Select a note"
+    fn get_title(&self) -> String {
+        "To-do List - Select a note".to_string()
     }
 
-    fn get_status(&self) -> &str {
-        "Select a note from the list"
+    fn get_status(&self) -> String {
+        "Select a note from the list".to_string()
     }
 
-    fn get_hotkey_text(&self) -> &str {
-        "Esc: Quit | W/S/↑/↓: Select Note"
+    fn get_hotkey_text(&self) -> String {
+        "Esc: Quit | W/S/↑/↓: Select Note".to_string()
     }
 
     fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) -> Result<(), Error> {

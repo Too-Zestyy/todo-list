@@ -2,7 +2,10 @@
 pub struct Note {
     pub id: u32,
     pub name: String,
-    pub description: String
+    pub description: String,
+
+    pub date_created_utc: String,
+    pub last_updated_utc: String,
 }
 
 #[derive(Debug)]
