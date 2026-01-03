@@ -45,6 +45,13 @@ impl AppScreenWithDBAccess for NoteViewScreen {
             KeyCode::Esc => {
                 self.signals.exit_requested = true;
             }
+            // TODO: Expand note view to include editing or make separate screen to edit fields
+            KeyCode::Char('e') => {
+                self.content.push_str("a");
+            }
+            KeyCode::Backspace => {
+                self.content.pop();
+            }
 
             _ => {}
         }
