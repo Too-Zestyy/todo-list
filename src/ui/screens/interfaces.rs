@@ -1,4 +1,4 @@
-use crossterm::event::{Event, KeyEvent};
+use ratatui::crossterm::event::{Event, KeyEvent};
 use ratatui::Frame;
 use ratatui::layout::Rect;
 use rusqlite::{Connection, Error};

@@ -1,9 +1,9 @@
 mod db;
 
 use std::error::Error;
-use crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event};
-use crossterm::{event, execute};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
+use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event};
+use ratatui::crossterm::{event, execute};
+use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
 use std::io;
 use ratatui::backend::{Backend, CrosstermBackend};
 use ratatui::Terminal;

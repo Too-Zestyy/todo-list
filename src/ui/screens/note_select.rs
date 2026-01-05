@@ -1,4 +1,4 @@
-use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
+use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::prelude::{Color, Modifier, Style, Text};

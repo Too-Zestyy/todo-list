@@ -1,8 +1,8 @@
-use crossterm::event::KeyEvent;
+use ratatui::crossterm::event::{Event, KeyCode, KeyEvent};
 use ratatui::Frame;
 use ratatui::layout::Rect;
 use rusqlite::{Connection, Error};
-use tui_textarea::TextArea;
+use tui_textarea::{Input, Key, TextArea};
 use crate::ui::screens::interfaces::AppScreenWithDBAccess;
 use crate::ui::screens::note_view::NoteViewSignals;
 
@@ -26,16 +26,45 @@ impl AppScreenWithDBAccess for NoteEditScreen<'_> {
     }
 
     fn get_status(&self) -> String {
-        todo!()
+        return "Editing note.".to_string()
     }
 
     fn get_hotkey_text(&self) -> String {
-        todo!()
+        return "TODO".to_string() 
+    }
+
+    fn handle_events(&mut self, event: &Event, conn: &Connection) -> Result<(), Error> {
+
+        // let input: Input = Input::from(event.clone());
+
+        match event.clone().into() {
+            Input { key: Key::Esc, .. } => {},
+            input => {
+                self.content_edit.input(input);
+            }
+        }
+
+        Ok(())
     }
 
     fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) -> Result<(), Error> {
         todo!()
     }
+
+    // fn handle_key_events(&mut self, key: &KeyEvent, conn: &Connection) -> Result<(), Error> {
+    //
+    //
+    //
+    //     match key {
+    //         Input { key: Key::Esc, .. } => {}
+    //
+    //         input => {
+    //             let _ = self.content_edit.input(input);
+    //         }
+    //     }
+    //
+    //     Ok(())
+    // }
 
     fn render(&self, rect: Rect, frame: &mut Frame) {
         todo!()

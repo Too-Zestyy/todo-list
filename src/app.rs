@@ -2,7 +2,7 @@
 
 use std::io;
 use std::io::Stdout;
-use crossterm::event::{self, Event};
+use ratatui::crossterm::event::{self, Event};
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::style::{Color, Modifier, Style, Stylize};
 use ratatui::text::Text;

@@ -1,5 +1,5 @@
 use ratatui::widgets::{Block, Wrap};
-use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
+use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 use ratatui::Frame;
 use ratatui::layout::Rect;
 use ratatui::style::{Style, Stylize};

@@ -1,6 +1,6 @@
-use crossterm::event;
-use crossterm::event::{KeyEventKind};
-use crossterm::event::KeyEvent;
+use ratatui::crossterm::event;
+use ratatui::crossterm::event::{KeyEventKind};
+use ratatui::crossterm::event::KeyEvent;
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::prelude::{Modifier, Style, Text};
