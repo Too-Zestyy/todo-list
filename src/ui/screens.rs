@@ -1,4 +1,4 @@
 pub mod interfaces;
 pub mod note_select;
 pub mod note_view;
-mod note_edit;
+pub mod note_edit;

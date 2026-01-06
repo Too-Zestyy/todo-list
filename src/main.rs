@@ -1,16 +1,13 @@
 mod db;
 
-use std::error::Error;
-use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture, Event};
-use ratatui::crossterm::{event, execute};
-use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
-use std::io;
 use ratatui::backend::{Backend, CrosstermBackend};
+use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
+use ratatui::crossterm::{event, execute};
 use ratatui::Terminal;
+use std::error::Error;
+use std::io;
 use todo_list::app;
-use todo_list::ui;
-use todo_list::ui::modals::interfaces::ModalDialog;
-use todo_list::ui::screens::note_select::get_note_title_page;
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut app::App) -> io::Result<bool> {
 

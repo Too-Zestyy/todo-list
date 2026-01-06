@@ -16,6 +16,7 @@ use crate::ui;
 use crate::ui::modals::exit::UiExitModalDialog;
 use crate::ui::modals::interfaces::ModalDialog;
 use crate::ui::screens::interfaces::AppScreenWithDBAccess;
+use crate::ui::screens::note_edit::NoteEditScreen;
 use crate::ui::screens::note_select::NoteSelectScreen;
 use crate::ui::screens::note_view::{NoteViewScreen, NoteViewSignals};
 
@@ -29,23 +30,25 @@ pub fn get_note_db_connection() -> rusqlite::Result<Connection, Error> {
 
 pub enum CurrentScreen {
     SelectNote,
-    ViewNote
+    ViewNote,
+    EditNote
 }
 
-pub struct AppScreenState {
+pub struct AppScreenState<'a> {
     current_screen: CurrentScreen,
     note_select_screen: NoteSelectScreen,
-    note_view_screen: NoteViewScreen
+    note_view_screen: NoteViewScreen,
+    note_edit_screen: NoteEditScreen<'a>,
 }
 
-pub struct App {
+pub struct App<'a> {
     pub notes_db_conn: Connection,
     pub exit_dialog: UiExitModalDialog,
-    pub screen_state: AppScreenState,
+    pub screen_state: AppScreenState<'a>,
 }
 
-impl App {
-    pub fn new() -> Result<App, Error> {
+impl App<'_> {
+    pub fn new() -> Result<App<'static>, Error> {
 
         let app_conn = get_note_db_connection()?;
         create_note_db_schema(&app_conn)?;
@@ -61,8 +64,11 @@ impl App {
             last_updated: "".to_string(),
             signals: NoteViewSignals {
                 exit_requested: false,
+                edit_requested: false,
             },
         };
+
+        let note_edit_screen = NoteEditScreen::default();
 
         Ok(App {
             notes_db_conn: app_conn,
@@ -71,6 +77,7 @@ impl App {
                 current_screen: CurrentScreen::SelectNote,
                 note_select_screen,
                 note_view_screen,
+                note_edit_screen,
             }
         })
     }
@@ -116,6 +123,7 @@ impl App {
                             last_updated: "".to_string(),
                             signals: NoteViewSignals {
                                 exit_requested: false,
+                                edit_requested: false,
                             },
                         });
 
@@ -138,6 +146,19 @@ impl App {
                     self.screen_state.note_view_screen.signals.exit_requested = false;
                 }
             },
+
+            CurrentScreen::EditNote => {
+                // let cur_screen = &self.screen_state.current_screen;
+
+                self.screen_state.note_edit_screen.handle_events(&event, &self.notes_db_conn)
+                    .expect("Error handling events for note edit.");
+
+                if self.screen_state.note_edit_screen.signals.exit_requested {
+                    // TODO: Ensure note view re-reads from DB to reflect changes
+                    self.screen_state.current_screen = CurrentScreen::ViewNote;
+                    self.screen_state.note_edit_screen.signals.exit_requested = false;
+                }
+            }
         }
 
     }
@@ -202,7 +223,13 @@ impl App {
                 status_content = self.screen_state.note_view_screen.get_status();
                 hotkey_content = self.screen_state.note_view_screen.get_hotkey_text();
             }
+            CurrentScreen::EditNote => {
+                self.screen_state.note_edit_screen.render(screen_rect, frame);
 
+                title_content = self.screen_state.note_edit_screen.get_title();
+                status_content = self.screen_state.note_edit_screen.get_status();
+                hotkey_content = self.screen_state.note_edit_screen.get_hotkey_text();
+            }
         }
         let title = Paragraph::new(Text::styled(
             title_content,

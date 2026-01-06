@@ -11,6 +11,7 @@ use crate::ui::screens::interfaces::AppScreenWithDBAccess;
 
 pub struct NoteViewSignals {
     pub exit_requested: bool,
+    pub edit_requested: bool,
 }
 
 // TODO: Add tags
@@ -83,6 +84,7 @@ impl NoteViewScreen {
             last_updated: note_details.last_updated_utc,
             signals: NoteViewSignals {
                 exit_requested: false,
+                edit_requested: false,
             }
         })
     }
