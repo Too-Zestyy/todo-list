@@ -6,7 +6,7 @@ use ratatui::style::Stylize;
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use rusqlite::{params, Connection, Error};
 use crate::app::App;
-use crate::db::notes::get_note_page_count;
+use crate::db::notes::{add_note, get_note_page_count};
 use crate::ui::screens::interfaces::{AppScreen, AppScreenWithDBAccess};
 
 const NOTE_PAGE_SIZE: usize = 10;
@@ -22,7 +22,8 @@ pub struct NoteSelectScreen {
 }
 
 pub struct NoteSelectSignals {
-    pub note_view_request: Option<u32>
+    pub note_view_request: Option<u32>,
+    pub note_create_request: bool
 }
 
 #[derive(Debug, Clone)]
@@ -144,6 +145,14 @@ impl AppScreenWithDBAccess for NoteSelectScreen {
                 // self.note_selection = self.current_note_page[self.current_selection_index];
             }
 
+            KeyCode::Char('n') => {
+                // TODO: Add confirmation dialogue before adding note
+
+                add_note(conn, "Created By pressing 'n'!", "This note was created by a text event!")?;
+
+                self.current_note_page = get_note_title_page(conn, self.currently_selected_page)?;
+            }
+
             _ => {}
         }
 
@@ -168,7 +177,8 @@ impl NoteSelectScreen {
                 note_page_count: get_note_page_count(conn, NOTE_PAGE_SIZE_U32)?,
 
                 signals: NoteSelectSignals {
-                    note_view_request: None
+                    note_view_request: None,
+                    note_create_request: false
                 }
             }
         )
