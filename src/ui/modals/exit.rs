@@ -27,6 +27,7 @@ impl ModalDialog for UiExitModalDialog {
             exit_requested: false,
         }
     }
+    
     fn handle_key_events(&mut self, key: &KeyEvent) {
         if key.kind == KeyEventKind::Press {
             match self.exit_state {
